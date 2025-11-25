@@ -1,0 +1,3 @@
+﻿  main.c
+D:\projects\C\MyOwnLanguage\main.c(254,1): warning C4715: 'verifySintaxe': not all control paths return a value
+  compiler.vcxproj -> D:\projects\C\MyOwnLanguage\Debug\compiler.exe

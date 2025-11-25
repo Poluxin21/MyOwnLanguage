@@ -1,1 +1,1 @@
-STRING variable = "string";
+STRING x = "string";

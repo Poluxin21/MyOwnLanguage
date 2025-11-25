@@ -1,0 +1,10 @@
+^D:\PROJECTS\C\MYOWNLANGUAGE\CMAKEFILES\32B1F8BDEF4D60C3E670D88844919BBD\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SD:/projects/C/MyOwnLanguage -BD:/projects/C/MyOwnLanguage --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/projects/C/MyOwnLanguage/compiler.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
