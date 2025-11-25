@@ -1,0 +1,6 @@
+# ToInstall
+
+```sh
+cmake ..
+make
+```

@@ -1,11 +1,17 @@
 #include <ctype.h>
 #include <stdio.h>
-#include <direct.h>
+
+#ifdef _WIN32
+    #include <direct.h>
+#else
+    #include <unistd.h>
+    #include <sys/stat.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-
-typedef enum {true, false} bool;
+#include <stdbool.h>
 
 void cacheFile(char* line_buffer) {
     FILE *file = fopen("compile.bin", "w");
@@ -22,7 +28,7 @@ bool validadeVariables(const char *variables[], char line_buffer[1024], int num_
     for (int i = 0; i < num_variables ; i++) {
         if (strstr(line_buffer, variables[i])) {
             *foundType = 1;
-            char* currentVar = variables[i];
+            const char* currentVar = variables[i];
             char* value = equals_sign + 1;
             while (isspace((unsigned char)*value)) value++;
 
@@ -118,7 +124,13 @@ int verifySintaxe(FILE* file) {
 
 int main(void) {
     char* mainFile = "main.atlx";
-    char* currentDir = _getcwd(NULL, 0);
+
+    #ifdef _WIN32
+        char* currentDir = _getcwd(NULL, 0);
+    #else
+        char* currentDir = getcwd(NULL, 0);
+    #endif
+
     if (currentDir == NULL) {
         perror("_getcwd");
         return EXIT_FAILURE;
@@ -132,11 +144,19 @@ int main(void) {
         *lastBackslash = '\0';
     }
 
-    if (_chdir(currentDir) != 0) {
-        perror("chdir");
-    } else {
-        printf("Mudou para: %s\n", _getcwd(NULL, 0));
-    }
+    #ifdef _WIN32
+        if (_chdir(currentDir) != 0) {
+            perror("chdir");
+        } else {
+            printf("Mudou para: %s\n", _getcwd(NULL, 0));
+        }
+    #else
+        if (chdir(currentDir) != 0) {
+            perror("chdir");
+        } else {
+            printf("Mudou para: %s\n", getcwd(NULL, 0));
+        }
+    #endif
 
     /// //// ///
 
