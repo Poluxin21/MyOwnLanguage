@@ -155,50 +155,66 @@ Token next_token() {
     return make_token(TOKEN_GENERIC, "?");
 }
 
-bool validadeVariables(const char *variables[], char line_buffer[1024], int num_variables, int *foundType, char *equals_sign) {
+bool validadeVariables(
+    const char *variables[],
+    char line_buffer[1024],
+    int num_variables,
+    int *foundType,
+    char *equals_sign
+) {
     for (int i = 0; i < num_variables ; i++) {
+
         if (strstr(line_buffer, variables[i])) {
+
             *foundType = 1;
+
             const char* currentVar = variables[i];
             char* value = equals_sign + 1;
+
             while (isspace((unsigned char)*value)) value++;
 
             if (strcmp(currentVar, "INT") == 0) {
                 if (!isdigit(*value)) {
-                    fprintf(stderr, "Error: Invalid Sintaxe, you need a number at line\n");
-                    *value = EXIT_FAILURE;
+                    fprintf(stderr,
+                        "Error: INT needs a number\n"
+                    );
                     return true;
                 }
             }
 
             if (strcmp(currentVar, "FLOAT") == 0) {
                 if (!(isdigit(*value) || *value == '.')) {
-                    fprintf(stderr, "Error: Invalid Sintaxe, you need a float number at line\n");
-                    *value = EXIT_FAILURE;
+                    fprintf(stderr,
+                        "Error: FLOAT needs a number or dot\n"
+                    );
                     return true;
                 }
             }
 
             if (strcmp(currentVar, "STRING") == 0) {
                 if (*value != '"') {
-                    fprintf(stderr, "Error: Invalid Sintaxe, you need quotes at line\n");
-                    *value = EXIT_FAILURE;
+                    fprintf(stderr,
+                        "Error: STRING needs quotes\n"
+                    );
                     return true;
                 }
             }
 
             if (strcmp(currentVar, "BOOL") == 0) {
-                if (strncmp(value, "true", 4) != 0 && strncmp(value, "false", 5) != 0) {
-                    fprintf(stderr, "Error: Invalid Sintaxe, you need 'true' or 'false' at line\n");
-                    *value = EXIT_FAILURE;
+                if (strncmp(value, "true", 4) != 0 &&
+                    strncmp(value, "false", 5) != 0) {
+                    fprintf(stderr,
+                        "Error: BOOL must be true or false\n"
+                    );
                     return true;
                 }
             }
 
             if (strcmp(currentVar, "CHAR") == 0) {
                 if (*value != '\'') {
-                    fprintf(stderr, "Error: Invalid Sintaxe, you need single quotes at line\n");
-                    *value = EXIT_FAILURE;
+                    fprintf(stderr,
+                        "Error: CHAR needs single quotes\n"
+                    );
                     return true;
                 }
             }
@@ -206,6 +222,7 @@ bool validadeVariables(const char *variables[], char line_buffer[1024], int num_
     }
     return false;
 }
+
 
 int verifySintaxe(FILE* file) {
     const char* variables[] = {"INT", "FLOAT", "STRING", "BOOL", "CHAR"};
@@ -233,7 +250,6 @@ int verifySintaxe(FILE* file) {
                     fprintf(stderr, "Error: Invalid Sintaxe, variable type not found at line\n");
                     return EXIT_FAILURE;
                 }
-
             }
 
             char* baseFunc = strchr(line_buffer, '(');
@@ -242,15 +258,15 @@ int verifySintaxe(FILE* file) {
                 while (isspace((unsigned char)*value)) value++;
             }
 
-
-
             if (line_buffer[lineLen - 1] != ';') {
                 fprintf(stderr, "Error: Invalid Sintaxe, you need the ';' at line\n");
                 return EXIT_FAILURE;
             }
         }
-        return 0;
+        continue;
     }
+
+    return 0;
 }
 
 
@@ -293,7 +309,12 @@ int main(void) {
     /// //// ///
 
     char fullPath[1024];
-    snprintf(fullPath, sizeof(fullPath), "%s\\%s", currentDir, mainFile);
+
+    #ifdef _WIN32
+        snprintf(fullPath, sizeof(fullPath), "%s\\%s", currentDir, mainFile);
+    #else
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", currentDir, mainFile);
+    #endif
 
     if (strstr(fullPath, mainFile) == NULL) {
         printf("Main file not found, you need to have a %s to start", mainFile);
