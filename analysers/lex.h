@@ -12,13 +12,18 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef enum {
-    VAR_INT,
-    VAR_FLOAT,
-    VAR_STRING,
-    VAR_BOOL,
-    VAR_CHAR,
+    DT_UNKNOWN = 0,
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_STRING,
+    TYPE_BOOL,
+    TYPE_CHAR
+} DataType;
+
+typedef enum {
     TOKEN_GENERIC,
     ASSIGN,
     INDENTIFIER,
@@ -29,12 +34,27 @@ typedef enum {
     TOKEN_DOUBLE_QUOT,
     TOKEN_QUOT,
     TOKEN_VAR_VALUE,
+    TOKEN_TYPE
 } tokenType;
 
 typedef struct {
     tokenType type;
-    char text[128];
+    char* text;
+    DataType dataType;
 } Token;
+
+typedef struct {
+    const char* name;
+    DataType type;
+} Keyword;
+
+Keyword keywords[] = {
+    {"INT", TYPE_INT},
+    {"FLOAT", TYPE_FLOAT},
+    {"STRING", TYPE_STRING},
+    {"BOOL", TYPE_BOOL},
+    {"CHAR", TYPE_CHAR},
+};
 
 char* src;
 int pos = 0;
@@ -47,10 +67,33 @@ char advance() {
     return src[pos++];
 }
 
+DataType lookup_keyword(const char* text) {
+    for (int i = 0; i < sizeof(keywords)/sizeof(keywords[0]); i++) {
+        if (strcmp(text, keywords[i].name) == 0)
+            return keywords[i].type;
+    }
+    return DT_UNKNOWN;
+}
+
 Token make_token(tokenType type, const char* text) {
     Token t;
     t.type = type;
+    t.dataType = DT_UNKNOWN;
+
+    t.text = (char*)malloc(strlen(text) + 1);
     strcpy(t.text, text);
+
+    return t;
+}
+
+Token make_type_token(DataType dt) {
+    Token t;
+    t.type = TOKEN_TYPE;
+    t.dataType = dt;
+
+    t.text = (char*)(malloc(16));
+    strcpy(t.text, "<type>");
+
     return t;
 }
 
@@ -104,16 +147,23 @@ Token next_token() {
 
         buffer[i] = '\0';
 
-        if (strcmp(buffer, "INT") == 0)
-            return make_token(VAR_INT, buffer);
-        if (strcmp(buffer, "FLOAT") == 0)
-            return make_token(VAR_FLOAT, buffer);
-        if (strcmp(buffer, "STRING") == 0)
-            return make_token(VAR_STRING, buffer);
-        if (strcmp(buffer, "BOOL") == 0)
-            return make_token(VAR_BOOL, buffer);
-        if (strcmp(buffer, "CHAR") == 0)
-            return make_token(VAR_CHAR, buffer);
+        // if (strcmp(buffer, "INT") == 0)
+        //     return make_token(VAR_INT, buffer);
+        // if (strcmp(buffer, "FLOAT") == 0)
+        //     return make_token(VAR_FLOAT, buffer);
+        // if (strcmp(buffer, "STRING") == 0)
+        //     return make_token(VAR_STRING, buffer);
+        // if (strcmp(buffer, "BOOL") == 0)
+        //     return make_token(VAR_BOOL, buffer);
+        // if (strcmp(buffer, "CHAR") == 0)
+        //     return make_token(VAR_CHAR, buffer);
+
+        DataType dt = lookup_keyword(buffer);
+        if (dt != DT_UNKNOWN)
+            return make_type_token(dt);
+        else
+            return make_token(INDENTIFIER, buffer);
+
 
         return make_token(INDENTIFIER, buffer);
     }
